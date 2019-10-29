@@ -32,7 +32,7 @@ def moving_avg(x, N):
     result : ndarray
     
     """
-     return np.convolve(x, np.ones((N,))/N, mode='valid')
+    return np.convolve(x, np.ones((N,))/N, mode='valid')
 
 def import_file(filename):
     """Import dataset file in CSV format.
