@@ -23,10 +23,12 @@ def moving_avg(x, N):
 
     Parameters
     ----------
+    x : list or ndarray
+    N : int
+        Window size.
 
     Returns
     -------
-
     result : ndarray
     
     """
