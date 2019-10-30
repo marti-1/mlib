@@ -84,7 +84,7 @@ def plot(y):
     plt.plot(y)
     plt.show()
 
-def bar_chart(y, x = None, labels = None, label_every=None):
+def bar_chart(y, x = None, labels = None, label_every=None, xlabel_rotation = 90):
     """Bar chart of data.
 
     Parameters
@@ -110,9 +110,9 @@ def bar_chart(y, x = None, labels = None, label_every=None):
 
         if label_every is not None:
             for i, l in enumerate(labels):
-                if (i % opts['label_every'] != 0):
+                if (i % label_every != 0):
                     labels[i] = ''
-        ax.set_xticklabels(labels, rotation = opts.get('rotation', 90))
+        ax.set_xticklabels(labels, rotation = xlabel_rotation)
     plt.show()
 
 def date_list_plot(dates, values, separate_axis = False, ylabel = '', ylabel2 = ''):
