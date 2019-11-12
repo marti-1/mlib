@@ -11,7 +11,8 @@ DOWNLOAD_URL=""
 INSTALL_REQUIRES = [
         'numpy>=1.16.2',
         'pandas>=0.24.1',
-        'matplotlib>=3.0.3'
+        'matplotlib>=3.0.3',
+        'arrow>=0.15.4'
 ]
 CLASSIFIERS =[
     "Programming Language :: Python :: 3",

@@ -8,6 +8,7 @@ import json
 import requests
 import collections
 import os
+import arrow
 
 def serialize(obj, fname):
     """Serialize object and store in a file."""
@@ -94,6 +95,20 @@ def date_trunc(dt, period = 'week'):
         new_date = dt- datetime.timedelta(days=dt.weekday()+1)
         new_date = new_date.replace(hour=0,minute=0,second=0)
         return new_date
+
+def datetime_from_string(s):
+    """Converts datetime string into a `datetime` object
+
+    Parameters
+    ----------
+    s : string
+
+    Returns
+    -------
+    dt : datetime
+
+    """
+    return arrow.get(s).datetime
 
 def plot(ys):
     """Line plot of data."""
