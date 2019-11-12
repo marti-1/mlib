@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import time
 import json
 import requests
+import collections
 
 def serialize(obj, fname):
     """Serialize object and store in a file."""
@@ -32,7 +33,7 @@ def moving_avg(x, N):
     result : ndarray
     
     """
-     return np.convolve(x, np.ones((N,))/N, mode='valid')
+    return np.convolve(x, np.ones((N,))/N, mode='valid')
 
 def import_file(filename):
     """Import dataset file in CSV format.
@@ -79,9 +80,13 @@ def date_trunc(dt, period = 'week'):
         new_date = new_date.replace(hour=0,minute=0,second=0)
         return new_date
 
-def plot(y):
+def plot(ys):
     """Line plot of data."""
-    plt.plot(y)
+    if isinstance(ys[0], (collections.Sequence, np.ndarray)):
+        for y in ys:
+            plt.plot(y)
+    else:
+        plt.plot(ys)
     plt.show()
 
 def bar_chart(y, x = None, labels = None, label_every=None):
@@ -267,3 +272,5 @@ def assoc(ds, k, v):
 
     """
     return {**ds, k: v}
+
+plot([[1,2,3,4], [56,7]])
