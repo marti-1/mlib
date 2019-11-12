@@ -272,5 +272,3 @@ def assoc(ds, k, v):
 
     """
     return {**ds, k: v}
-
-plot([[1,2,3,4], [56,7]])
