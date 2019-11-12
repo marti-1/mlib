@@ -7,6 +7,7 @@ import time
 import json
 import requests
 import collections
+import os
 
 def serialize(obj, fname):
     """Serialize object and store in a file."""
@@ -35,32 +36,46 @@ def moving_avg(x, N):
     """
     return np.convolve(x, np.ones((N,))/N, mode='valid')
 
-def import_file(filename):
-    """Import dataset file in CSV format.
+def import_file(filename, as_dicts = True):
+    """Import dataset file in CSV/JSON format.
     
     Parameters
     ----------
     filename : string
+    as_dicts : bool, optional
+        should CSV file representing rows be dicts
 
     Returns
     -------
     data : list of dicts
     
     """
-    return pd.read_csv(filename).to_dict('records')
+    _, file_extension = os.path.splitext(filename)
+    if file_extension == '.csv':
+        df = pd.read_csv(filename)
+        if as_dicts:
+            return df.to_dict('records')
+        else:
+            return df.values.tolist()
+    elif file_extension == '.json':
+        with open(filename, 'r') as f:
+            return json.load(f)
+    else:
+        raise Exception('File type "{0}" is not supported'.format(file_extension))
 
 def unix_time_to_dt(ts):
     """Converts UNIX timestamp to DateTime object.
 
     Parameters
     ----------
-    ts : int
+    ts : int,string,double
 
     Returns
     -------
     datetime : DateTime
 
     """
+    ts = int(ts)
     try:
         return datetime.datetime.fromtimestamp(ts)
     except ValueError:
