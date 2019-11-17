@@ -302,3 +302,33 @@ def assoc(ds, k, v):
 
     """
     return {**ds, k: v}
+
+import multiprocessing
+from multiprocessing import Pool
+
+def parallel(xs, fn, chunksize = 1):
+    """Parallel execution of function over a list.
+
+    Parameters
+    ----------
+    xs : list
+    fn : function
+    chunksize : int, optional
+                Number of items to assign for each worker.
+
+    
+    Returns
+    -------
+    result : list
+
+    Examples
+    --------
+
+        def f(x):
+            time.sleep(.5)
+
+        out = parallel(range(1000), f)
+
+    """
+    with Pool(multiprocessing.cpu_count()) as p:
+        return p.map(fn, xs, chunksize)
