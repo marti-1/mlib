@@ -96,7 +96,7 @@ def date_trunc(dt, period = 'week'):
         new_date = new_date.replace(hour=0,minute=0,second=0)
         return new_date
 
-def datetime_from_string(s):
+def str_to_dt(s):
     """Converts datetime string into a `datetime` object
 
     Parameters
@@ -110,13 +110,26 @@ def datetime_from_string(s):
     """
     return arrow.get(s).datetime
 
-def plot(ys):
-    """Line plot of data."""
+def plot(ys, xs = None):
+    """Line plot of data.
+
+    Parameters
+    ----------
+    ys : list or list of lists
+    xs : list or list of lists, optional
+    
+    """
     if isinstance(ys[0], (collections.Sequence, np.ndarray)):
-        for y in ys:
-            plt.plot(y)
+        for idx, y in enumerate(ys):
+            if xs is not None:
+                plt.plot(y, xs[idx])
+            else:
+                plt.plot(y)
     else:
-        plt.plot(ys)
+        if xs is not None:
+            plt.plot(ys, xs)
+        else:
+            plt.plot(ys)
     plt.show()
 
 def bar_chart(y, x = None, labels = None, label_every=None, xlabel_rotation = 90):
@@ -302,6 +315,39 @@ def assoc(ds, k, v):
 
     """
     return {**ds, k: v}
+
+def join(x, y):
+    """Join two arrays of tuples on the first element.
+
+    Parameters
+    ----------
+    x : list
+    y : list
+
+    Returns
+    -------
+    result : list
+
+    """
+    out = []
+    x_sorted = sorted(x, key=lambda k: k[0])
+    y_sorted = sorted(y, key=lambda k: k[0])
+    i = 0
+    j = 0
+    while i < len(x_sorted) and j < len(y_sorted):
+        if x_sorted[i][0] < y_sorted[j][0]:
+            i+=1
+            continue
+        if x_sorted[i][0] > y_sorted[j][0]:
+            j+=1
+            continue
+        if x_sorted[i][0] == y_sorted[j][0]:
+            r = [x_sorted[i][0]]
+            r += x_sorted[i][1:] + y_sorted[j][1:]
+            out.append(r)
+            i += 1
+            j += 1
+    return out
 
 import multiprocessing
 from multiprocessing import Pool
