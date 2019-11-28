@@ -20,6 +20,10 @@ CLASSIFIERS =[
 ]
 PYTHON_REQUIRES='>=3.6'
 
+PACKAGE_DATA = {
+        'data': '*'
+}
+
 try:
     from setuptools import setup
     _has_setuptools = True
@@ -43,5 +47,6 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         packages=setuptools.find_packages(),
         classifiers=CLASSIFIERS,
-        python_requires=PYTHON_REQUIRES
+        python_requires=PYTHON_REQUIRES,
+        package_data = PACKAGE_DATA
     )
