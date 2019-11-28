@@ -12,6 +12,9 @@ import os
 import arrow
 import csv
 
+import pkg_resources
+
+
 def serialize(obj, fname):
     """Serialize object and store in a file."""
     with open(fname, 'wb') as handle:
@@ -336,7 +339,7 @@ def dataset(*args, **kwargs):
 
     if args[0] == 'cryptocurrency':
         slug = args[1]
-        id_slug = import_file('data/cryptocurrency/cryptocurrency_id_slug.csv', as_dicts = False)
+        id_slug = import_file(pkg_resources.resource_filename(__name__, '../data/cryptocurrency/cryptocurrency_id_slug.csv'), as_dicts = False)
         id_by_slug = {x[1]: int(x[0]) for x in id_slug}
         return historical_price(
             id_by_slug[slug],
@@ -468,4 +471,3 @@ def parallel(xs, fn, chunksize = 1, n_workers = None):
         n_workers = multiprocessing.cpu_count()
     with Pool(n_workers) as p:
         return p.map(fn, xs, chunksize)
-
