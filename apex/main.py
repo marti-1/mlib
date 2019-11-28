@@ -1,3 +1,4 @@
+from urllib import parse
 import pickle
 import numpy as np
 import pandas as pd
@@ -9,6 +10,7 @@ import requests
 import collections
 import os
 import arrow
+import csv
 
 def serialize(obj, fname):
     """Serialize object and store in a file."""
@@ -37,34 +39,78 @@ def moving_avg(x, N):
     """
     return np.convolve(x, np.ones((N,))/N, mode='valid')
 
-def import_file(filename, as_dicts = True):
+def import_file(filename, fmt=None, as_dicts = True):
     """Import dataset file in CSV/JSON format.
     
     Parameters
     ----------
     filename : string
+    fmt : {"csv", "json"}, optional
+        format of the imported file
     as_dicts : bool, optional
         should CSV file representing rows be dicts
 
     Returns
     -------
-    data : list of dicts
-    
-    """
-    _, file_extension = os.path.splitext(filename)
-    if file_extension == '.csv':
-        df = pd.read_csv(filename)
-        if as_dicts:
-            return df.to_dict('records')
-        else:
-            return df.values.tolist()
-    elif file_extension == '.json':
-        with open(filename, 'r') as f:
-            return json.load(f)
-    else:
-        raise Exception('File type "{0}" is not supported'.format(file_extension))
+    data : list of dicts/lists
 
-def unix_time_to_dt(ts):
+    Examples
+    --------
+
+        Import CSV file
+
+        >>> import_file('filename.csv', as_dicts = False)
+
+        Import remote JSON
+
+        >>> import_file('https://remote.path/of/file', fmt = 'json')
+    """
+
+    def is_http_uri(x):
+        if len(x) > 4 and x[:4] == 'http':
+            return True
+        else:
+            return False
+
+    _, file_extension = os.path.splitext(filename)
+    if fmt is None:
+        fmt = file_extension[1:]
+
+    if is_http_uri(filename) and fmt == 'json':
+        return json.loads(requests.get(filename).content)
+    elif not is_http_uri(filename):
+        if fmt == 'csv':
+            if as_dicts:
+                df = pd.read_csv(filename)
+                return df.to_dict('records')
+            else:
+                with open(filename, newline='') as csvfile:
+                    return list(csv.reader(csvfile))
+        elif fmt == 'json':
+            with open(filename, 'r') as f:
+                return json.load(f)
+        else:
+            raise Exception('File type "{0}" is not supported'.format(fmt))
+
+def export(xs, filename, fmt = 'csv'):
+    """Exports list to a file.
+
+    Parameters
+    ----------
+    xs : list
+    filename: string
+    fmt : {"csv"}, optional
+        format of the exported file
+
+    """
+    assert(fmt in set(['csv', 'json']))
+    with open(filename, 'w', newline='') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        for x in xs:
+            wr.writerow(x)
+
+
+def unixtime_to_dt(ts):
     """Converts UNIX timestamp to DateTime object.
 
     Parameters
@@ -81,6 +127,20 @@ def unix_time_to_dt(ts):
         return datetime.datetime.fromtimestamp(ts)
     except ValueError:
         return datetime.datetime.fromtimestamp(ts // 1000)
+
+def dt_to_unixtime(dt):
+    """Converts DateTime object into Unix time integer.
+
+    Parameters
+    ----------
+    dt : DateTime
+
+    Returns
+    -------
+    result : int
+
+    """
+    return int(time.mktime(dt.timetuple()))
 
 def date_trunc(dt, period = 'week'):
     """Truncates DateTime object.
@@ -110,26 +170,41 @@ def str_to_dt(s):
     """
     return arrow.get(s).datetime
 
-def plot(ys, xs = None):
+def plot(ys, xs = None, opts = None):
     """Line plot of data.
 
     Parameters
     ----------
     ys : list or list of lists
     xs : list or list of lists, optional
-    
+
+    Examples
+    --------
+
+        >>> plot([a, b] opts = [
+                {'linewidth' : 1, 'linestyle':'dashed'},
+                {'linewidth' : 1},
+            ])
+
     """
+
     if isinstance(ys[0], (collections.Sequence, np.ndarray)):
+
+        if opts is None:
+            opts = [{}] * len(ys)
+
         for idx, y in enumerate(ys):
             if xs is not None:
-                plt.plot(y, xs[idx])
+                plt.plot(y, xs[idx], **opts[idx])
             else:
-                plt.plot(y)
+                plt.plot(y, **opts[idx])
     else:
+        if opts is None:
+            opts = {}
         if xs is not None:
-            plt.plot(ys, xs)
+            plt.plot(ys, xs, opts)
         else:
-            plt.plot(ys)
+            plt.plot(ys, opts)
     plt.show()
 
 def bar_chart(y, x = None, labels = None, label_every=None, xlabel_rotation = 90):
@@ -216,7 +291,7 @@ def date_list_plot(dates, values, separate_axis = False, ylabel = '', ylabel2 = 
     plt.gcf().autofmt_xdate()
     plt.show()
 
-def dataset(*args):
+def dataset(*args, **kwargs):
     """Load dataset.
 
     Available datasets:
@@ -226,6 +301,7 @@ def dataset(*args):
     ----------
     args : list
         Path to a dataset
+    kwargs : additional parameters
 
     Returns
     -------
@@ -237,29 +313,40 @@ def dataset(*args):
         Get bitcoin prices:
 
         >>> dataset('cryptocurrency', 'bitcoin')
-        {'market_cap_by_available_supply': [[1367174841000, 1500517590], ...
+        [(1367272801, 143.99990845), (1367359201, 139.00004578),...
 
     """
+
+    def historical_price(slug_id, start = None, end = None, interval = '1d'):
+        if start is None:
+            start = unixtime_to_dt(1367193601)
+
+        if end is None:
+            end = unixtime_to_dt(int(time.time()))
+
+        url = 'https://web-api.coinmarketcap.com/v1/cryptocurrency/quotes/historical?convert=USD&format=chart_crypto_details&id={0}&interval={3}&time_end={2}&time_start={1}'.format(slug_id, dt_to_unixtime(start), dt_to_unixtime(end), interval)
+
+        data = import_file(url, fmt='json')
+        if data['status']['error_message'] is not None:
+            raise Exception(data['status']['error_message'])
+        data = data['data']
+        prices = {(dt_to_unixtime(str_to_dt(ts)), row['USD'][0]) for ts, row in data.items()}
+        return sorted(prices, key=lambda x: x[0])
+
+
     if args[0] == 'cryptocurrency':
         slug = args[1]
-
-        def historical_coin_url(slug, start, end):
-            return 'https://graphs2.coinmarketcap.com/currencies/{slug}/{start}000/{end}000/'.format(
-                        slug=slug, 
-                        start=int(time.mktime(start.timetuple())), 
-                        end=int(time.mktime(end.timetuple()))
-                    )
-
-        def get_coin_history(slug, start, end):
-            url = historical_coin_url(slug, start, end)
-            data = json.loads(requests.get(url).content)
-            return data
-
-        start = datetime.date(2013, 4, 28)
-        end = datetime.date.today()
-        return get_coin_history(slug, start, end)
+        id_slug = import_file('data/cryptocurrency/cryptocurrency_id_slug.csv', as_dicts = False)
+        id_by_slug = {x[1]: int(x[0]) for x in id_slug}
+        return historical_price(
+            id_by_slug[slug],
+            start = kwargs.get('start', None),
+            end = kwargs.get('end', None),
+            interval = kwargs.get('interval', '1d')
+        )
 
     raise Exception('{0} is unknown dataset'.format(','.join(args)))
+
 
 def group_by(xs, fn):
     """Group list by function.
@@ -352,7 +439,7 @@ def join(x, y):
 import multiprocessing
 from multiprocessing import Pool
 
-def parallel(xs, fn, chunksize = 1):
+def parallel(xs, fn, chunksize = 1, n_workers = None):
     """Parallel execution of function over a list.
 
     Parameters
@@ -361,7 +448,8 @@ def parallel(xs, fn, chunksize = 1):
     fn : function
     chunksize : int, optional
                 Number of items to assign for each worker.
-
+    n_workers : int, optional
+                Number of parallel workers to run.
     
     Returns
     -------
@@ -376,5 +464,8 @@ def parallel(xs, fn, chunksize = 1):
         out = parallel(range(1000), f)
 
     """
-    with Pool(multiprocessing.cpu_count()) as p:
+    if n_workers is None:
+        n_workers = multiprocessing.cpu_count()
+    with Pool(n_workers) as p:
         return p.map(fn, xs, chunksize)
+
