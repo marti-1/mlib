@@ -21,7 +21,7 @@ CLASSIFIERS =[
 PYTHON_REQUIRES='>=3.6'
 
 PACKAGE_DATA = {
-        'data': ['*']
+        'apex': ['data/cryptocurrency/*']
 }
 
 try:
