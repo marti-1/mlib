@@ -1,3 +1,3 @@
 from .main import *
 
-name = "apex"
+name = "mlib"

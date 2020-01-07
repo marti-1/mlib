@@ -1,10 +1,11 @@
 #! /usr/bin/env python
+import setuptools
 
-DESCRIPTION = "apex: friendly data-science toolkit"
-DISTNAME = 'apex'
+DESCRIPTION = "Just a bunch of frequently used functions for algotrading related research."
+DISTNAME = 'mlib'
 MAINTAINER = 'Martynas Miliauskas'
 MAINTAINER_EMAIL = 'martynas.miliauskas@protonmail.com'
-VERSION = '0.3.2'
+VERSION = '1.0.0'
 LICENSE = ""
 URL = ""
 DOWNLOAD_URL=""
@@ -12,17 +13,14 @@ INSTALL_REQUIRES = [
         'numpy>=1.16.2',
         'pandas>=0.24.1',
         'matplotlib>=3.0.3',
-        'arrow>=0.15.4'
+        'arrow>=0.15.4',
+        'requests>=2.22.0'
 ]
 CLASSIFIERS =[
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
 PYTHON_REQUIRES='>=3.6'
-
-PACKAGE_DATA = {
-        'apex': ['data/cryptocurrency/*']
-}
 
 try:
     from setuptools import setup
@@ -47,6 +45,5 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         packages=setuptools.find_packages(),
         classifiers=CLASSIFIERS,
-        python_requires=PYTHON_REQUIRES,
-        package_data = PACKAGE_DATA
+        python_requires=PYTHON_REQUIRES
     )
