@@ -1,7 +1,15 @@
 # Install
 
+**Production version**
+
 ```
 pip3 install git+git://github.com/marti-1/apex.git@v0.3.0
+```
+
+**Development version**
+
+```buildoutcfg
+pip3 install -e ./
 ```
 
 ## Philosophy
