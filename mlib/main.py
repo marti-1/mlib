@@ -31,10 +31,10 @@ def deserialize(fname):
 def import_csv(filename, as_dicts=True):
     with open(filename, newline='') as csvfile:
         if as_dicts:
-            return csv.DictReader(csvfile)
+            reader = csv.DictReader(csvfile)
         else:
-            return csv.reader(csvfile)
-
+            reader = csv.reader(csvfile)
+        return list(reader)
 
 def import_json(filename, remote=False):
     if remote:
@@ -270,3 +270,7 @@ def returns(xs):
     p1 = xs[:-1]
     p2 = xs[1:]
     return (p2 - p1) / p1
+
+
+def volatility(xs):
+    return np.std(np.log(xs[1:]/xs[:-1]))
