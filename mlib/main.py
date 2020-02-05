@@ -80,10 +80,7 @@ def unixtime_to_dt(ts):
 
     """
     ts = int(ts)
-    try:
-        return datetime.datetime.fromtimestamp(ts)
-    except ValueError:
-        return datetime.datetime.fromtimestamp(ts // 1000)
+    return arrow.get(ts).datetime
 
 
 def dt_to_unixtime(dt):
@@ -239,38 +236,3 @@ def parallel(xs, fn, chunksize=1, n_workers=None):
         n_workers = multiprocessing.cpu_count()
     with Pool(n_workers) as p:
         return p.map(fn, xs, chunksize)
-
-
-#     ___ _
-#    / __(_)_ __   __ _ _ __   ___ ___
-#   / _\ | | '_ \ / _` | '_ \ / __/ _ \
-#  / /   | | | | | (_| | | | | (_|  __/
-#  \/    |_|_| |_|\__,_|_| |_|\___\___|
-#
-
-def simple_moving_avg(xs, d):
-    acc = xs.copy()
-    for i in range(d, len(xs)):
-        acc[i] = np.mean(xs[i - d:i])
-    return acc
-
-
-def sharpe(ret, rf):
-    """Annualized Sharpe ratio."""
-    N = len(ret)
-    excess_ret = ret - rf / N
-    return round(np.sqrt(N) * np.mean(excess_ret) / np.std(excess_ret), 2)
-
-
-def pct_price_change(newp, oldp):
-    return np.abs(newp - oldp) / oldp * 100
-
-
-def returns(xs):
-    p1 = xs[:-1]
-    p2 = xs[1:]
-    return (p2 - p1) / p1
-
-
-def volatility(xs):
-    return np.std(np.log(xs[1:]/xs[:-1]))
