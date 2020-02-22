@@ -3,7 +3,7 @@
 **Production version**
 
 ```
-pip3 install git+git://github.com/marti-1/apex.git@v0.3.0
+pip3 install git+git://github.com/marti-1/mlib.git
 ```
 
 **Development version**
