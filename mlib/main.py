@@ -218,6 +218,13 @@ def first(iterable, condition = lambda x: True):
 
     return next(x for x in iterable if condition(x))
 
+def partition_by_mask(xs, mask):
+    keys = np.unique(mask)
+    out = []
+    for key in keys:
+        out.append(xs[np.where(mask == key)])
+    return out
+
 #                _ _   _                                   _
 #    /\/\  _   _| | |_(_)_ __  _ __ ___   ___ ___  ___ ___(_)_ __   __ _
 #   /    \| | | | | __| | '_ \| '__/ _ \ / __/ _ \/ __/ __| | '_ \ / _` |
