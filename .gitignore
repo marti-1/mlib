@@ -3,6 +3,7 @@ __pycache__/
 *.swp
 
 .idea/
-venv/
 
 mlib.egg-info/
+
+env/
