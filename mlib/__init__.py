@@ -1,4 +1,4 @@
 from .main import *
-__all__ = ["plots"]
+__all__ = ["plots", "sqlfs"]
 
 name = "mlib"
