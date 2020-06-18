@@ -218,6 +218,9 @@ def first(iterable, condition = lambda x: True):
 
     return next(x for x in iterable if condition(x))
 
+def flatten(xs):
+    return [item for sublist in xs for item in sublist]
+
 def partition_by_mask(xs, mask):
     keys = np.unique(mask)
     out = []
